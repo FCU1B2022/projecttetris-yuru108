@@ -7,6 +7,21 @@
 #define CANVAS_WIDTH 10
 #define CANVAS_HEIGHT 20
 
+#define LEFT_KEY 0x25     // The key to move left, default = 0x25 (left arrow)
+#define RIGHT_KEY 0x27    // The key to move right, default = 0x27 (right arrow)
+#define ROTATE_KEY 0x26   // The key to rotate, default = 0x26 (up arrow)
+#define DOWN_KEY 0x28     // The key to move down, default = 0x28 (down arrow)
+#define FALL_KEY 0x20     // The key to fall, default = 0x20 (spacebar)
+
+#define FALL_DELAY 500    // The delay between each fall, default = 500
+#define RENDER_DELAY 100  // The delay between each frame, default = 100
+
+#define LEFT_FUNC() GetAsyncKeyState(LEFT_KEY) & 0x8000
+#define RIGHT_FUNC() GetAsyncKeyState(RIGHT_KEY) & 0x8000
+#define ROTATE_FUNC() GetAsyncKeyState(ROTATE_KEY) & 0x8000
+#define DOWN_FUNC() GetAsyncKeyState(DOWN_KEY) & 0x8000
+#define FALL_FUNC() GetAsyncKeyState(FALL_KEY) & 0x8000
+
 typedef enum
 {
 	RED = 1,
