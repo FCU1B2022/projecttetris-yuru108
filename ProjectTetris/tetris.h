@@ -16,6 +16,7 @@
 
 #define FALL_DELAY 500	 // The delay between each fall, default = 500
 #define RENDER_DELAY 100 // The delay between each frame, default = 100
+#define LEVEL_RANGE 5
 
 #define LEFT_FUNC() GetAsyncKeyState(LEFT_KEY) & 0x8000
 #define RIGHT_FUNC() GetAsyncKeyState(RIGHT_KEY) & 0x8000
@@ -60,8 +61,10 @@ typedef struct
 {
 	int x;
 	int y;
-	int score;
 	int rotate;
+	int score;
+	int line;
+	int level;
 	int fallTime;
 	bool hold_use;
 	ShapeID hold;
@@ -80,5 +83,6 @@ void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int original_Y, int original_Rotate, int new_X, int new_Y, int new_Rotate, ShapeID shapeID);
+void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);

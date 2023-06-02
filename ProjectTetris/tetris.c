@@ -183,24 +183,27 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int origina
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
     printf("\033[0;0H\n");
+    printf("\033[1;0H LEVEL: %d\n", state->level);
+    printf("\033[2;0H Line:  %d /%d\n", state->line, 10 + state->level*LEVEL_RANGE);
+    printf("\033[3;0H Score: %d\n", state->score);
+
+    printf("\033[%d;%dH\n", 0, 15);
     for (int i = 0; i < CANVAS_HEIGHT; i++)
     {
-        printf("|");
+        printf("\033[%d;%dH|", i, 15);
         for (int j = 0; j < CANVAS_WIDTH; j++)
             printf("\033[%dm\u3000", canvas[i][j].color);
         printf("\033[0m|\n");
     }
 
-    printf("\n\tScore: %d\n", state->score);
-
     Shape shapeData = shapes[state->queue[1]];
-    printf("\033[%d;%dHNext:", 3, CANVAS_WIDTH * 2 + 5);
+    printf("\033[%d;%dHNext:", 3, CANVAS_WIDTH * 2 + 20);
     for (int i = 1; i <= 3; i++)
     {
         shapeData = shapes[state->queue[i]];
         for (int j = 0; j < 4; j++)
         {
-            printf("\033[%d;%dH", i * 4 + j + 1, CANVAS_WIDTH * 2 + 15);
+            printf("\033[%d;%dH", i * 4 + j + 1, CANVAS_WIDTH * 2 + 30);
             for (int k = 0; k < 4; k++)
             {
                 if (j < shapeData.size && k < shapeData.size && shapeData.rotates[0][j][k])
@@ -212,14 +215,14 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
     }
     
     if(!state->hold_use)
-        printf("\033[%d;%dHHold (used):", 16, CANVAS_WIDTH * 2 + 5);
+        printf("\033[%d;%dHHold (used):", 16, CANVAS_WIDTH * 2 + 20);
     else
-        printf("\033[%d;%dHHold:       ", 16, CANVAS_WIDTH * 2 + 5);
+        printf("\033[%d;%dHHold:       ", 16, CANVAS_WIDTH * 2 + 20);
 
     shapeData = shapes[state->hold];
     for (int j = 0; j < 4; j++)
     {
-        printf("\033[%d;%dH", 18 + j, CANVAS_WIDTH * 2 + 15);
+        printf("\033[%d;%dH", 18 + j, CANVAS_WIDTH * 2 + 30);
         for (int k = 0; k < 4; k++)
         {
             if (j < shapeData.size && k < shapeData.size && shapeData.rotates[0][j][k])
@@ -275,6 +278,19 @@ int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH])
     return linesCleared;
 }
 
+void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+{
+    int linesCleared = clearLine(canvas);
+    if(linesCleared == 1)
+        state->score += 100*state->level;
+    else if(linesCleared == 2)
+        state->score += 300*state->level;
+    else if(linesCleared == 3)
+        state->score += 500*state->level;
+    else if(linesCleared == 4)
+        state->score += 800*state->level;
+}
+
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
     if (ROTATE_FUNC())
@@ -328,7 +344,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         state->hold_use = false;
     }
 
-    state->fallTime += RENDER_DELAY;
+    state->fallTime += RENDER_DELAY + state->level * 20;
 
     while (state->fallTime >= FALL_DELAY)
     {
@@ -338,7 +354,16 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
             state->y++;
         else
         {
-            state->score += clearLine(canvas);
+            score_count(canvas, state);
+
+            state->line += clearLine(canvas);
+
+            if(state->line == 10 + state->level*LEVEL_RANGE)
+            {
+                printf("\033[5;0H\x1b[42m LEVEL UP!\x1b[0m\n");
+                state->level += 1;
+                state->line = 0;
+            }
 
             state->x = CANVAS_WIDTH / 2;
             state->y = 0;
@@ -352,7 +377,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 
             if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
             {
-                printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT - 3, CANVAS_WIDTH * 2 + 5, CANVAS_HEIGHT + 5, 0);
+                printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 10, CANVAS_HEIGHT + 5, 0);
                 exit(0);
             }
         }

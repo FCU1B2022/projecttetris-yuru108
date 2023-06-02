@@ -9,6 +9,7 @@ void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int original_Y, int original_Rotate, int new_X, int new_Y, int new_Rotate, ShapeID shapeID);
+void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
 
@@ -19,8 +20,10 @@ int main()
     State state = {
         .x = CANVAS_WIDTH / 2,
         .y = 0,
-        .score = 0,
         .rotate = 0,
+        .score = 0,
+        .line = 0,
+        .level = 1,
         .fallTime = 0,
         .hold_use = true,
         .hold = -1
@@ -28,8 +31,6 @@ int main()
 
     for (int i = 0; i < 4; i++)
         state.queue[i] = rand() % 7;
-
-    // state.hold = state.queue[1];
 
     Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH];
     for (int i = 0; i < CANVAS_HEIGHT; i++)
