@@ -1,5 +1,128 @@
 #include "tetris.h"
 
+Shape shapes[7] = {
+	{.shape = I,
+	 .color = CYAN,
+	 .size = 4,
+	 .rotates =
+		 {
+			 {{0, 0, 0, 0},
+			  {1, 1, 1, 1},
+			  {0, 0, 0, 0},
+			  {0, 0, 0, 0}},
+			 {{0, 0, 1, 0},
+			  {0, 0, 1, 0},
+			  {0, 0, 1, 0},
+			  {0, 0, 1, 0}},
+			 {{0, 0, 0, 0},
+			  {0, 0, 0, 0},
+			  {1, 1, 1, 1},
+			  {0, 0, 0, 0}},
+			 {{0, 1, 0, 0},
+			  {0, 1, 0, 0},
+			  {0, 1, 0, 0},
+			  {0, 1, 0, 0}}}},
+	{.shape = J,
+	 .color = BLUE,
+	 .size = 3,
+	 .rotates =
+		 {
+			 {{1, 0, 0},
+			  {1, 1, 1},
+			  {0, 0, 0}},
+			 {{0, 1, 1},
+			  {0, 1, 0},
+			  {0, 1, 0}},
+			 {{0, 0, 0},
+			  {1, 1, 1},
+			  {0, 0, 1}},
+			 {{0, 1, 0},
+			  {0, 1, 0},
+			  {1, 1, 0}}}},
+	{.shape = L,
+	 .color = YELLOW,
+	 .size = 3,
+	 .rotates =
+		 {
+			 {{0, 0, 1},
+			  {1, 1, 1},
+			  {0, 0, 0}},
+			 {{0, 1, 0},
+			  {0, 1, 0},
+			  {0, 1, 1}},
+			 {{0, 0, 0},
+			  {1, 1, 1},
+			  {1, 0, 0}},
+			 {{1, 1, 0},
+			  {0, 1, 0},
+			  {0, 1, 0}}}},
+	{.shape = O,
+	 .color = WHITE,
+	 .size = 2,
+	 .rotates =
+		 {
+			 {{1, 1},
+			  {1, 1}},
+			 {{1, 1},
+			  {1, 1}},
+			 {{1, 1},
+			  {1, 1}},
+			 {{1, 1},
+			  {1, 1}}}},
+	{.shape = S,
+	 .color = GREEN,
+	 .size = 3,
+	 .rotates =
+		 {
+			 {{0, 1, 1},
+			  {1, 1, 0},
+			  {0, 0, 0}},
+			 {{0, 1, 0},
+			  {0, 1, 1},
+			  {0, 0, 1}},
+			 {{0, 0, 0},
+			  {0, 1, 1},
+			  {1, 1, 0}},
+			 {{1, 0, 0},
+			  {1, 1, 0},
+			  {0, 1, 0}}}},
+	{.shape = T,
+	 .color = PURPLE,
+	 .size = 3,
+	 .rotates =
+		 {
+			 {{0, 1, 0},
+			  {1, 1, 1},
+			  {0, 0, 0}},
+
+			 {{0, 1, 0},
+			  {0, 1, 1},
+			  {0, 1, 0}},
+			 {{0, 0, 0},
+			  {1, 1, 1},
+			  {0, 1, 0}},
+			 {{0, 1, 0},
+			  {1, 1, 0},
+			  {0, 1, 0}}}},
+	{.shape = Z,
+	 .color = RED,
+	 .size = 3,
+	 .rotates =
+		 {
+			 {{1, 1, 0},
+			  {0, 1, 1},
+			  {0, 0, 0}},
+			 {{0, 0, 1},
+			  {0, 1, 1},
+			  {0, 1, 0}},
+			 {{0, 0, 0},
+			  {1, 1, 0},
+			  {0, 1, 1}},
+			 {{0, 1, 0},
+			  {1, 1, 0},
+			  {1, 0, 0}}}},
+};
+
 void setBlock(Block *block, Color color, ShapeID shape, bool current)
 {
     block->color = color;
@@ -68,6 +191,8 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         printf("\033[0m|\n");
     }
 
+    printf("\n\tScore: %d\n", state->score);
+
     Shape shapeData = shapes[state->queue[1]];
     printf("\033[%d;%dHNext:", 3, CANVAS_WIDTH * 2 + 5);
     for (int i = 1; i <= 3; i++)
@@ -75,7 +200,7 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         shapeData = shapes[state->queue[i]];
         for (int j = 0; j < 4; j++)
         {
-            printf("\033[%d;%dH", i * 4 + j, CANVAS_WIDTH * 2 + 15);
+            printf("\033[%d;%dH", i * 4 + j + 1, CANVAS_WIDTH * 2 + 15);
             for (int k = 0; k < 4; k++)
             {
                 if (j < shapeData.size && k < shapeData.size && shapeData.rotates[0][j][k])
@@ -83,6 +208,24 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
                 else
                     printf("\x1b[0m  ");
             }
+        }
+    }
+    
+    if(!state->hold_use)
+        printf("\033[%d;%dHHold (used):", 16, CANVAS_WIDTH * 2 + 5);
+    else
+        printf("\033[%d;%dHHold:       ", 16, CANVAS_WIDTH * 2 + 5);
+
+    shapeData = shapes[state->hold];
+    for (int j = 0; j < 4; j++)
+    {
+        printf("\033[%d;%dH", 18 + j, CANVAS_WIDTH * 2 + 15);
+        for (int k = 0; k < 4; k++)
+        {
+            if (j < shapeData.size && k < shapeData.size && shapeData.rotates[0][j][k])
+                printf("\x1b[%dm  ", shapeData.color);
+            else
+                printf("\x1b[0m  ");
         }
     }
     return;
@@ -155,6 +298,36 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
     else if (FALL_FUNC())
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
 
+    if(state->hold_use && HOLD_FUNC())
+    {
+        for (int i = 0; i < shapes[state->queue[0]].size; i++)
+        {
+            for (int j = 0; j < shapes[state->queue[0]].size; j++)
+                resetBlock(&canvas[state->y + i][state->x + j]);
+        }
+
+        if(state->hold == -1)
+        {
+            state->hold = state->queue[0];
+            state->queue[0] = state->queue[1];
+            state->queue[1] = state->queue[2];
+            state->queue[2] = state->queue[3];
+            state->queue[3] = rand() % 7;
+        }
+        else
+        {
+            ShapeID tmp = state->queue[0];
+            state->queue[0] = state->hold;
+            state->hold = tmp;
+        }
+
+        state->x = CANVAS_WIDTH / 2;
+        state->y = 0;
+        state->rotate = 0;
+        state->fallTime = 0;
+        state->hold_use = false;
+    }
+
     state->fallTime += RENDER_DELAY;
 
     while (state->fallTime >= FALL_DELAY)
@@ -171,6 +344,7 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
             state->y = 0;
             state->rotate = 0;
             state->fallTime = 0;
+            state->hold_use = true;
             state->queue[0] = state->queue[1];
             state->queue[1] = state->queue[2];
             state->queue[2] = state->queue[3];

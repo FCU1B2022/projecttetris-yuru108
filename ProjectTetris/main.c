@@ -12,6 +12,7 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int origina
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
 
+
 int main()
 {
     srand(time(NULL));
@@ -20,11 +21,15 @@ int main()
         .y = 0,
         .score = 0,
         .rotate = 0,
-        .fallTime = 0
+        .fallTime = 0,
+        .hold_use = true,
+        .hold = -1
     };
 
     for (int i = 0; i < 4; i++)
         state.queue[i] = rand() % 7;
+
+    // state.hold = state.queue[1];
 
     Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH];
     for (int i = 0; i < CANVAS_HEIGHT; i++)
@@ -34,7 +39,6 @@ int main()
     }
 
     system("cls");
-    printf("\e[?25l"); // hide cursor
 
     move(canvas, state.x, state.y, state.rotate, state.x, state.y, state.rotate, state.queue[0]);
 
