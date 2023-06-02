@@ -171,7 +171,8 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state)
     }
 }
 
-int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]) {
+int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH])
+{
     for (int i = 0; i < CANVAS_HEIGHT; i++) {
         for (int j = 0; j < CANVAS_WIDTH; j++) {
             if (canvas[i][j].current) {
@@ -181,7 +182,6 @@ int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]) {
     }
 
     int linesCleared = 0;
-
     for (int i = CANVAS_HEIGHT - 1; i >= 0; i--)
     {
         bool isFull = true;
@@ -207,7 +207,5 @@ int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]) {
             i++;
         }
     }
-
-
     return linesCleared;
 }
