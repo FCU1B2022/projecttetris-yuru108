@@ -5,7 +5,6 @@
 #include <windows.h>
 #include "tetris.h"
 
-State *init(void);
 void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
@@ -13,11 +12,26 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int origina
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
 
-
 int main()
 {
     srand(time(NULL));
-    State *state = init();
+    State state = {
+        .x = CANVAS_WIDTH / 2,
+        .y = 0,
+        .score = 0,
+        .rotate = 0,
+        .fallTime = 0
+    };
+
+    for (int i = 0; i < 4; i++)
+        state.queue[i] = rand() % 7;
+
+    Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH];
+    for (int i = 0; i < CANVAS_HEIGHT; i++)
+    {
+        for (int j = 0; j < CANVAS_WIDTH; j++)
+            resetBlock(&canvas[i][j]);
+    }
 
     system("cls");
     printf("\e[?25l"); // hide cursor
