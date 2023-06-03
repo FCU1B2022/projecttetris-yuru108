@@ -291,8 +291,24 @@ void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         state->score += 800*state->level;
 }
 
+void game_pause()
+{
+    if(PAUSE_FUNC())
+    {
+        printf("\033[%d;%dH\x1b[43m PAUSE \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 12, CANVAS_HEIGHT + 5, 0);
+        while(1)
+        {
+            Sleep(100);
+            if(PAUSE_FUNC())
+                break;
+        }
+    }
+}
+
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
+    game_pause();
+
     if (ROTATE_FUNC())
     {
         int new_Rotate = (state->rotate + 1) % 4;

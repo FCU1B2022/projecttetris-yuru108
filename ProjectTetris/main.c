@@ -10,6 +10,7 @@ void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int original_Y, int original_Rotate, int new_X, int new_Y, int new_Rotate, ShapeID shapeID);
 void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
+void game_pause(void);
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
 
