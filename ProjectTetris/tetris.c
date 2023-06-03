@@ -402,31 +402,8 @@ void game_pause()
     }
 }
 
-void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+void hold(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
-    game_pause();
-
-    if (ROTATE_FUNC())
-    {
-        int new_Rotate = (state->rotate + 1) % 4;
-        if (move(canvas, state->x, state->y, state->rotate, state->x, state->y, new_Rotate, state->queue[0]))
-            state->rotate = new_Rotate;
-    }
-    else if (LEFT_FUNC())
-    {
-        if (move(canvas, state->x, state->y, state->rotate, state->x - 1, state->y, state->rotate, state->queue[0]))
-            state->x -= 1;
-    }
-    else if (RIGHT_FUNC())
-    {
-        if (move(canvas, state->x, state->y, state->rotate, state->x + 1, state->y, state->rotate, state->queue[0]))
-            state->x += 1;
-    }
-    else if (DOWN_FUNC())
-        state->fallTime = FALL_DELAY;
-    else if (FALL_FUNC())
-        state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
-
     if(state->hold_use && HOLD_FUNC())
     {
         for (int i = 0; i < shapes[state->queue[0]].size; i++)
@@ -456,6 +433,37 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         state->fallTime = 0;
         state->hold_use = false;
     }
+}
+
+void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+{
+    game_pause();
+
+    if (ROTATE_FUNC())
+    {
+        int new_Rotate = (state->rotate + 1) % 4;
+        if (move(canvas, state->x, state->y, state->rotate, state->x, state->y, new_Rotate, state->queue[0]))
+            state->rotate = new_Rotate;
+    }
+    else if (LEFT_FUNC())
+    {
+        if (move(canvas, state->x, state->y, state->rotate, state->x - 1, state->y, state->rotate, state->queue[0]))
+            state->x -= 1;
+    }
+    else if (RIGHT_FUNC())
+    {
+        if (move(canvas, state->x, state->y, state->rotate, state->x + 1, state->y, state->rotate, state->queue[0]))
+            state->x += 1;
+    }
+    else if (DOWN_FUNC())
+        state->fallTime = FALL_DELAY;
+    else if (FALL_FUNC())
+    {
+        state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
+        Sleep(10);
+    }
+
+    hold(canvas, state);
 
     state->fallTime += RENDER_DELAY + state->level * 20;
 
@@ -525,7 +533,7 @@ int evaluate(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State test)
     {
         for(int j=0; j<size; j++)
         {
-            if(!shapeData.rotates[test.rotate][i][j] && canvas[test.y+i][test.x+j].shape == EMPTY)
+            if(!shapeData.rotates[test.rotate][i][j] && canvas[test.y+i+1][test.x+j].shape == EMPTY)
                 state_score -= 2;
 
             if(shapeData.rotates[test.rotate][i][j])
@@ -548,10 +556,10 @@ int evaluate(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State test)
 State* best_move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State state)
 {
     State test = state;
+    State best_solve = test;
     Shape shapeData = shapes[test.queue[0]];
     int size = shapeData.size;
     int best_score = 0;
-    State best_solve = test;
 
     for(int rotate=0; rotate<4; rotate++)  // each block has 4 directions
     {
@@ -628,7 +636,7 @@ void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         {
             score_count(canvas, state);
 
-            if(state->line == 10 + state->level*LEVEL_RANGE)
+            if(state->line == 5 + state->level*LEVEL_RANGE)
             {
                 printf("\033[5;0H\x1b[42m LEVEL UP!\x1b[0m\n");
                 state->level += 1;
