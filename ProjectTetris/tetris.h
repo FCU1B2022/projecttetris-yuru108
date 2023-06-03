@@ -14,6 +14,7 @@
 #define FALL_KEY 0x20	// The key to fall, default = 0x20 (spacebar)
 #define HOLD_KEY 0x10   // The key to hold, default = 0x10 (shift)
 #define PAUSE_KEY 0x0D  // The key to pause, default = 0x0D (enter)
+#define AUTO_KEY 0x11   // The key to auto mode, default = 0x11 (control)
 
 #define FALL_DELAY 500	 // The delay between each fall, default = 500
 #define RENDER_DELAY 100 // The delay between each frame, default = 100
@@ -26,6 +27,7 @@
 #define FALL_FUNC() GetAsyncKeyState(FALL_KEY) & 0x8000
 #define HOLD_FUNC() GetAsyncKeyState(HOLD_KEY) & 0x8000
 #define PAUSE_FUNC() GetAsyncKeyState(PAUSE_KEY) & 0x8000
+#define AUTO_FUNC() GetAsyncKeyState(AUTO_KEY) & 0x8000
 
 typedef enum
 {

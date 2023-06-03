@@ -49,8 +49,11 @@ int main()
 
     while(1)
     {
-        //logic(canvas, &state);
-        auto_play(canvas, &state);
+        if(AUTO_FUNC())
+            auto_play(canvas, &state);
+        else
+            logic(canvas, &state);
+        
         printCanvas(canvas, &state);
         Sleep(100);
     }
