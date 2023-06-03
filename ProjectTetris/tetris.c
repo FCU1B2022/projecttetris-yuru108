@@ -281,6 +281,9 @@ int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH])
 void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
     int linesCleared = clearLine(canvas);
+
+    state->line += linesCleared;
+
     if(linesCleared == 1)
         state->score += 100*state->level;
     else if(linesCleared == 2)
@@ -295,12 +298,32 @@ void game_pause()
 {
     if(PAUSE_FUNC())
     {
+        int flag = 0;
         printf("\033[%d;%dH\x1b[43m PAUSE \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 12, CANVAS_HEIGHT + 5, 0);
         while(1)
         {
             Sleep(100);
-            if(PAUSE_FUNC())
-                break;
+
+            if(LEFT_FUNC())
+                flag = 0;  
+            if(RIGHT_FUNC())
+                flag = 1;
+
+            if(!flag)
+            {
+                printf("\033[%d;%dH\x1b[42m continue \x1b[0m  exit \033[%d;%dH", CANVAS_HEIGHT /2 + 2, CANVAS_WIDTH + 8, CANVAS_HEIGHT + 5, 0);
+                if(PAUSE_FUNC())
+                    break;
+            }
+            if(flag)
+            {
+                printf("\033[%d;%dH continue  \x1b[41m exit \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2 + 2, CANVAS_WIDTH + 8, CANVAS_HEIGHT + 5, 0);
+                if(PAUSE_FUNC())
+                {
+                    printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 10, CANVAS_HEIGHT + 5, 0);
+                    exit(0);
+                }
+            }
         }
     }
 }
@@ -372,14 +395,15 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         {
             score_count(canvas, state);
 
-            state->line += clearLine(canvas);
-
             if(state->line == 10 + state->level*LEVEL_RANGE)
             {
                 printf("\033[5;0H\x1b[42m LEVEL UP!\x1b[0m\n");
                 state->level += 1;
                 state->line = 0;
             }
+
+            if(state->line == 1)
+                printf("\033[5;0H          \n");
 
             state->x = CANVAS_WIDTH / 2;
             state->y = 0;
@@ -399,4 +423,162 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         }
     }
     return;
+}
+
+int evaluate(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State test)
+{
+    Shape shapeData = shapes[test.queue[0]];
+    int size = shapeData.size;
+    int state_score = test.y*4;
+
+    for (int i = CANVAS_HEIGHT - 1; i >= 0; i--)
+    {
+        bool isFull = true;
+        for (int j = 0; j < CANVAS_WIDTH; j++)
+        {
+            if (canvas[i][j].shape == EMPTY && !shapeData.rotates[test.rotate][i][j])
+            {
+                isFull = false;
+                break;
+            }
+        }
+
+        if (isFull)
+            state_score += 100;
+    }
+
+    for(int i=0; i<size; i++) // the state round the test_block
+    {
+        for(int j=0; j<size; j++)
+        {
+            if(!shapeData.rotates[test.rotate][i][j] && canvas[test.y+i][test.x+j].shape == EMPTY)
+                state_score -= 2;
+
+            if(shapeData.rotates[test.rotate][i][j])
+                state_score += i*2;
+
+            if(shapeData.rotates[test.rotate][i][j])
+            {
+                if(test.y+1 < CANVAS_HEIGHT && canvas[test.y+i+1][test.x+j].shape != EMPTY)
+                    state_score += 1;
+                if(test.x+1 < CANVAS_WIDTH && canvas[test.y+i][test.x+j+1].shape != EMPTY)
+                    state_score += 1;
+                if(test.y-1 >= 0 && canvas[test.y+i][test.x+j-1].shape != EMPTY)
+                    state_score += 1;
+            }
+        }
+    }
+    return state_score;
+}
+
+State* best_move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State state)
+{
+    State test = state;
+    Shape shapeData = shapes[test.queue[0]];
+    int size = shapeData.size;
+    int best_score = 0;
+    State best_solve = test;
+
+    for(int rotate=0; rotate<4; rotate++)  // each block has 4 directions
+    {
+        test.x = 0;
+        test.y = 0;
+        test.rotate = rotate;
+
+        while(test.x < CANVAS_WIDTH)
+        {
+            bool move = true;
+            while(move)
+            {
+                for(int i=0; i<size; i++)
+                {
+                    for(int j=0; j<size; j++)
+                    {
+                        if (shapeData.rotates[test.rotate][i][j])
+                        {
+                            if (!canvas[test.y + 1 + i][test.x + j].current && canvas[test.y + 1 + i][test.x + j].shape != EMPTY)
+                                move = false;
+                        }
+                    }
+                }
+                if(move)
+                    test.y += 1;
+            }
+            
+            int now_score = evaluate(canvas, test);
+            if(now_score > best_score)
+            {
+                best_score = now_score;
+                best_solve = test;
+            }
+
+            test.x += 1;
+            test.y = 0;
+        }
+    }
+    return &best_solve;
+}
+
+void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+{
+    game_pause();
+
+    State* best = best_move(canvas, *state);
+    int targ_x = best->x;
+    int targ_y = best->y;
+    int targ_rotate = best->rotate;
+
+    if(state->rotate != targ_rotate)
+    {
+        int new_Rotate = (state->rotate + 1) % 4;
+        if (move(canvas, state->x, state->y, state->rotate, state->x, state->y, new_Rotate, state->queue[0]))
+            state->rotate = new_Rotate;
+    }
+    else if(state->x > targ_x && move(canvas, state->x, state->y, state->rotate, state->x - 1, state->y, state->rotate, state->queue[0]))
+            state->x -= 1;
+    else if(state->x < targ_x && move(canvas, state->x, state->y, state->rotate, state->x + 1, state->y, state->rotate, state->queue[0]))
+            state->x += 1;
+    else
+        state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
+
+
+    state->fallTime += RENDER_DELAY + state->level * 20;
+
+    while (state->fallTime >= FALL_DELAY)
+    {
+        state->fallTime -= FALL_DELAY;
+
+        if (move(canvas, state->x, state->y, state->rotate, state->x, state->y + 1, state->rotate, state->queue[0]))
+            state->y++;
+        else
+        {
+            score_count(canvas, state);
+
+            if(state->line == 10 + state->level*LEVEL_RANGE)
+            {
+                printf("\033[5;0H\x1b[42m LEVEL UP!\x1b[0m\n");
+                state->level += 1;
+                state->line = 0;
+            }
+
+            if(state->line == 1)
+                printf("\033[5;0H          \n");
+
+            state->x = CANVAS_WIDTH / 2;
+            state->y = 0;
+            state->rotate = 0;
+            state->fallTime = 0;
+            state->hold_use = true;
+            state->queue[0] = state->queue[1];
+            state->queue[1] = state->queue[2];
+            state->queue[2] = state->queue[3];
+            state->queue[3] = rand() % 7;
+
+            if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
+            {
+                printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 10, CANVAS_HEIGHT + 5, 0);
+                exit(0);
+            }
+        }
+    }
 }

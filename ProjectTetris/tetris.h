@@ -89,3 +89,7 @@ void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 void game_pause(void);
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
+
+int evaluate(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH],State test);
+State* best_move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State state);
+void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
