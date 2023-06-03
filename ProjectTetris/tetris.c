@@ -123,6 +123,80 @@ Shape shapes[7] = {
 			  {1, 0, 0}}}},
 };
 
+void hide_cursor()
+{
+    HANDLE hStdOut = NULL;
+    CONSOLE_CURSOR_INFO curInfo;
+
+    hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleCursorInfo(hStdOut, &curInfo);
+    curInfo.bVisible = FALSE;
+    SetConsoleCursorInfo(hStdOut, &curInfo);
+}
+
+void start()
+{
+    int flag = 0;
+    while(1)
+    {
+        Sleep(100);
+
+        printf("\033[%d;%dH\x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m\n", 3, 5);
+        printf("\033[%d;%dH  \x1b[47m \x1b[0m    \x1b[47m \x1b[0m        \x1b[47m \x1b[0m    \x1b[47m \x1b[0m   \x1b[47m \x1b[0m    \x1b[47m \x1b[0m    \x1b[47m \x1b[0m\n", 4, 5);
+        printf("\033[%d;%dH  \x1b[47m \x1b[0m    \x1b[47m     \x1b[0m    \x1b[47m \x1b[0m    \x1b[47m   \x1b[0m      \x1b[47m \x1b[0m     \x1b[47m   \x1b[0m\n", 5, 5);
+        printf("\033[%d;%dH  \x1b[47m \x1b[0m    \x1b[47m \x1b[0m        \x1b[47m \x1b[0m    \x1b[47m \x1b[0m  \x1b[47m \x1b[0m     \x1b[47m \x1b[0m        \x1b[47m \x1b[0m\n", 6, 5);
+        printf("\033[%d;%dH  \x1b[47m \x1b[0m    \x1b[47m     \x1b[0m    \x1b[47m \x1b[0m    \x1b[47m \x1b[0m   \x1b[47m \x1b[0m  \x1b[47m     \x1b[0m  \x1b[47m     \x1b[0m\n", 7, 5);
+
+        if(LEFT_FUNC())
+            flag = 0;  
+        if(RIGHT_FUNC())
+            flag = 1;
+
+        if(!flag)
+        {
+            printf("\033[%d;%dH\x1b[42m start \x1b[0m  rule ", 12, 17);
+            if(START_FUNC())
+                break;
+        }
+        if(flag)
+        {
+            printf("\033[%d;%dH start  \x1b[43m rule \x1b[0m", 12, 17);
+            if(START_FUNC())
+            {
+                system("cls");
+                Sleep(100);
+
+                printf("\033[%d;%dH R U L E\n", 3, 5);
+                printf("\033[%d;%dH - press \x1b[42m Left \x1b[0m \x1b[42m Down \x1b[0m \x1b[42m Right \x1b[0m to move block\n", 5, 5);
+                printf("\033[%d;%dH - press \x1b[42m Up \x1b[0m to rotate 90 clockwise\n", 7, 5);
+                printf("\033[%d;%dH - press \x1b[42m Space \x1b[0m to hard drop\n", 9, 5);
+                printf("\033[%d;%dH - press \x1b[42m Shift \x1b[0m to hold\n", 11, 5);
+                printf("\033[%d;%dH - press \x1b[42m Enter \x1b[0m to \x1b[43m pause \x1b[0m\n", 13, 5);
+                printf("\033[%d;%dH - press \x1b[42m Ctrl \x1b[0m to \x1b[41m AUTO Mode \x1b[0m\n", 15, 5);
+
+                printf("\033[%d;%dH S C O R E\n", 18, 5);
+                printf("\033[%d;%dH - 1 line:  100\n",20, 5);
+                printf("\033[%d;%dH - 2 lines: 300\n",22, 5);
+                printf("\033[%d;%dH - 3 lines: 500\n",24, 5);
+                printf("\033[%d;%dH - 4 lines: 800\n",26, 5);
+                
+                printf("\033[%d;%dH Press SPACE to return", 29, 13);
+                
+                while(1)
+                {
+                    if(START_FUNC())
+                    {
+                        system("cls");
+                        break;
+                    }
+                }
+            }
+        }
+
+        printf("\033[%d;%dH Press SPACE to select", 15, 13);
+    }
+}
+
 void setBlock(Block *block, Color color, ShapeID shape, bool current)
 {
     block->color = color;

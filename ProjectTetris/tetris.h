@@ -13,6 +13,7 @@
 #define DOWN_KEY 0x28	// The key to move down, default = 0x28 (down arrow)
 #define FALL_KEY 0x20	// The key to fall, default = 0x20 (spacebar)
 #define HOLD_KEY 0x10   // The key to hold, default = 0x10 (shift)
+#define START_KEY 0x20  // The key to start, default = 0x20 (spacebar)
 #define PAUSE_KEY 0x0D  // The key to pause, default = 0x0D (enter)
 #define AUTO_KEY 0x11   // The key to auto mode, default = 0x11 (control)
 
@@ -28,6 +29,7 @@
 #define HOLD_FUNC() GetAsyncKeyState(HOLD_KEY) & 0x8000
 #define PAUSE_FUNC() GetAsyncKeyState(PAUSE_KEY) & 0x8000
 #define AUTO_FUNC() GetAsyncKeyState(AUTO_KEY) & 0x8000
+#define START_FUNC() GetAsyncKeyState(START_KEY) & 0x8000
 
 typedef enum
 {
@@ -83,6 +85,8 @@ typedef struct
 } Block;
 
 
+void hide_cursor(void);
+void start(void);
 void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);

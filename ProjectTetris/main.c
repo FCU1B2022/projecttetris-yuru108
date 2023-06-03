@@ -5,6 +5,8 @@
 #include <windows.h>
 #include "tetris.h"
 
+void hide_cursor(void);
+void start(void);
 void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
@@ -42,9 +44,12 @@ int main()
         for (int j = 0; j < CANVAS_WIDTH; j++)
             resetBlock(&canvas[i][j]);
     }
-
+    
+    hide_cursor();
+    start();
+    Sleep(100);
+    
     system("cls");
-
     move(canvas, state.x, state.y, state.rotate, state.x, state.y, state.rotate, state.queue[0]);
 
     while(1)
