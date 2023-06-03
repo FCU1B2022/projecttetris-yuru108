@@ -437,6 +437,8 @@ void hold(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 
 void control(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
+    printf("\033[7;0H            \n");
+
     if (ROTATE_FUNC())
     {
         int new_Rotate = (state->rotate + 1) % 4;
@@ -560,6 +562,8 @@ State* best_move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State state)
 
 void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
+    printf("\033[7;0H \x1b[41m AUTO mode \x1b[0m\n");
+
     State* best = best_move(canvas, *state);
     int targ_x = best->x;
     int targ_y = best->y;
