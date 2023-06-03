@@ -14,6 +14,7 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int origina
 void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 void game_pause(void);
 void hold(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
+void control(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State* state);
 int clearLine(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH]);
 
@@ -58,7 +59,7 @@ int main()
         if(AUTO_FUNC())
             auto_play(canvas, &state);
         else
-            logic(canvas, &state);
+            control(canvas, &state);
         
         printCanvas(canvas, &state);
         Sleep(100);

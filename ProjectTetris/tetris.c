@@ -258,7 +258,7 @@ void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
     printf("\033[0;0H\n");
     printf("\033[1;0H LEVEL: %d\n", state->level);
-    printf("\033[2;0H Line:  %d /%d\n", state->line, 10 + state->level*LEVEL_RANGE);
+    printf("\033[2;0H Line: %2d /%d\n", state->line, 10 + state->level*LEVEL_RANGE);
     printf("\033[3;0H Score: %d\n", state->score);
 
     printf("\033[%d;%dH\n", 0, 15);
@@ -435,10 +435,8 @@ void hold(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
     }
 }
 
-void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+void control(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
-    game_pause();
-
     if (ROTATE_FUNC())
     {
         int new_Rotate = (state->rotate + 1) % 4;
@@ -458,53 +456,12 @@ void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
     else if (DOWN_FUNC())
         state->fallTime = FALL_DELAY;
     else if (FALL_FUNC())
-    {
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
-        Sleep(10);
-    }
 
     hold(canvas, state);
-
-    state->fallTime += RENDER_DELAY + state->level * 20;
-
-    while (state->fallTime >= FALL_DELAY)
-    {
-        state->fallTime -= FALL_DELAY;
-
-        if (move(canvas, state->x, state->y, state->rotate, state->x, state->y + 1, state->rotate, state->queue[0]))
-            state->y++;
-        else
-        {
-            score_count(canvas, state);
-
-            if(state->line == 10 + state->level*LEVEL_RANGE)
-            {
-                printf("\033[5;0H\x1b[42m LEVEL UP!\x1b[0m\n");
-                state->level += 1;
-                state->line = 0;
-            }
-
-            if(state->line == 1)
-                printf("\033[5;0H          \n");
-
-            state->x = CANVAS_WIDTH / 2;
-            state->y = 0;
-            state->rotate = 0;
-            state->fallTime = 0;
-            state->hold_use = true;
-            state->queue[0] = state->queue[1];
-            state->queue[1] = state->queue[2];
-            state->queue[2] = state->queue[3];
-            state->queue[3] = rand() % 7;
-
-            if (!move(canvas, state->x, state->y, state->rotate, state->x, state->y, state->rotate, state->queue[0]))
-            {
-                printf("\033[%d;%dH\x1b[41m GAME OVER \x1b[0m\033[%d;%dH", CANVAS_HEIGHT /2, CANVAS_WIDTH + 10, CANVAS_HEIGHT + 5, 0);
-                exit(0);
-            }
-        }
-    }
-    return;
+    
+    Sleep(50);
+    logic(canvas, state);
 }
 
 int evaluate(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State test)
@@ -603,8 +560,6 @@ State* best_move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State state)
 
 void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
 {
-    game_pause();
-
     State* best = best_move(canvas, *state);
     int targ_x = best->x;
     int targ_y = best->y;
@@ -623,6 +578,12 @@ void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
     else
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
 
+    logic(canvas, state);
+}
+
+void logic(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+{
+    game_pause();
 
     state->fallTime += RENDER_DELAY + state->level * 20;
 
@@ -663,4 +624,5 @@ void auto_play(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
             }
         }
     }
+    return;
 }
