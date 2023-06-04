@@ -87,8 +87,10 @@ typedef struct
 
 void hide_cursor(void);
 void start(void);
+void rule(void);
 void setBlock(Block *block, Color color, ShapeID shape, bool current);
 void resetBlock(Block *block);
+void printState(State *state);
 void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);
 bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int original_Y, int original_Rotate, int new_X, int new_Y, int new_Rotate, ShapeID shapeID);
 void score_count(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state);

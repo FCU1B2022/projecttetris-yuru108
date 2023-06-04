@@ -162,38 +162,41 @@ void start()
         {
             printf("\033[%d;%dH start  \x1b[43m rule \x1b[0m", 12, 17);
             if(START_FUNC())
-            {
-                system("cls");
-                Sleep(100);
-
-                printf("\033[%d;%dH R U L E\n", 3, 5);
-                printf("\033[%d;%dH - press \x1b[42m Left \x1b[0m \x1b[42m Down \x1b[0m \x1b[42m Right \x1b[0m to move block\n", 5, 5);
-                printf("\033[%d;%dH - press \x1b[42m Up \x1b[0m to rotate 90 clockwise\n", 7, 5);
-                printf("\033[%d;%dH - press \x1b[42m Space \x1b[0m to hard drop\n", 9, 5);
-                printf("\033[%d;%dH - press \x1b[42m Shift \x1b[0m to hold\n", 11, 5);
-                printf("\033[%d;%dH - press \x1b[42m Enter \x1b[0m to \x1b[43m pause \x1b[0m\n", 13, 5);
-                printf("\033[%d;%dH - press \x1b[42m Ctrl \x1b[0m to \x1b[41m AUTO Mode \x1b[0m\n", 15, 5);
-
-                printf("\033[%d;%dH S C O R E\n", 18, 5);
-                printf("\033[%d;%dH - 1 line:  100\n",20, 5);
-                printf("\033[%d;%dH - 2 lines: 300\n",22, 5);
-                printf("\033[%d;%dH - 3 lines: 500\n",24, 5);
-                printf("\033[%d;%dH - 4 lines: 800\n",26, 5);
-                
-                printf("\033[%d;%dH Press SPACE to return", 29, 13);
-                
-                while(1)
-                {
-                    if(START_FUNC())
-                    {
-                        system("cls");
-                        break;
-                    }
-                }
-            }
+                rule();
         }
 
         printf("\033[%d;%dH Press SPACE to select", 15, 13);
+    }
+}
+
+void rule()
+{
+    system("cls");
+    Sleep(100);
+
+    printf("\033[%d;%dH R U L E\n", 3, 5);
+    printf("\033[%d;%dH - press \x1b[42m Left \x1b[0m \x1b[42m Down \x1b[0m \x1b[42m Right \x1b[0m to move block\n", 5, 5);
+    printf("\033[%d;%dH - press \x1b[42m Up \x1b[0m to rotate 90 clockwise\n", 7, 5);
+    printf("\033[%d;%dH - press \x1b[42m Space \x1b[0m to hard drop\n", 9, 5);
+    printf("\033[%d;%dH - press \x1b[42m Shift \x1b[0m to hold\n", 11, 5);
+    printf("\033[%d;%dH - press \x1b[42m Enter \x1b[0m to \x1b[43m pause \x1b[0m\n", 13, 5);
+    printf("\033[%d;%dH - press \x1b[42m Ctrl \x1b[0m to \x1b[41m AUTO Mode \x1b[0m\n", 15, 5);
+
+    printf("\033[%d;%dH S C O R E\n", 18, 5);
+    printf("\033[%d;%dH - 1 line:  100\n",20, 5);
+    printf("\033[%d;%dH - 2 lines: 300\n",22, 5);
+    printf("\033[%d;%dH - 3 lines: 500\n",24, 5);
+    printf("\033[%d;%dH - 4 lines: 800\n",26, 5);
+    
+    printf("\033[%d;%dH Press SPACE to return", 29, 13);
+    
+    while(1)
+    {
+        if(START_FUNC())
+        {
+            system("cls");
+            break;
+        }
     }
 }
 
@@ -254,13 +257,15 @@ bool move(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], int original_X, int origina
     return true;
 }
 
-void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+void printState(State *state)
 {
-    printf("\033[0;0H\n");
     printf("\033[1;0H LEVEL: %d\n", state->level);
     printf("\033[2;0H Line: %2d /%d\n", state->line, 10 + state->level*LEVEL_RANGE);
     printf("\033[3;0H Score: %d\n", state->score);
+}
 
+void printCanvas(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
+{
     printf("\033[%d;%dH\n", 0, 15);
     for (int i = 0; i < CANVAS_HEIGHT; i++)
     {
@@ -461,8 +466,7 @@ void control(Block canvas[CANVAS_HEIGHT][CANVAS_WIDTH], State *state)
         state->fallTime += FALL_DELAY * CANVAS_HEIGHT;
 
     hold(canvas, state);
-    
-    Sleep(50);
+
     logic(canvas, state);
 }
 
